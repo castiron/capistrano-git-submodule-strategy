@@ -6,7 +6,7 @@ class Capistrano::Git
     include Capistrano::Git::DefaultStrategy
 
     def test
-      test! " [ -f #{repo_path}/HEAD ] "
+      test! " [ -d #{repo_path}/.git ] "
     end
 
     def check
@@ -24,11 +24,15 @@ class Capistrano::Git
     end
 
     def clone
-      git :clone, '--mirror', repo_url, repo_path
+      git :clone, '--depth=1', '--recursive', '-b', fetch(:branch), repo_url, repo_path
     end
 
     def update
-      git :remote, :update
+      git :fetch, '--all'
+      git :checkout, '-f', "origin/#{fetch(:branch)}"
+      git :submodule, :sync
+      git :submodule, :update, '--init', '--recursive'
+      git :clean, '-fd'
     end
 
     # put the working tree in a release-branch,
@@ -36,7 +40,7 @@ class Capistrano::Git
     # and copy everything to the release path
     def release
       unless context.test(:test, '-e', release_path) && context.test("ls -A #{release_path} | read linevar")
-        git :clone, '--depth=1', '--recursive', '-b', fetch(:branch), "file://#{repo_path}", release_path
+        context.execute("cp -r #{repo_path}/* #{release_path}/")
         context.execute("find #{release_path} -name '.git*' | xargs -I {} rm -rfv {}")
       end
     end
