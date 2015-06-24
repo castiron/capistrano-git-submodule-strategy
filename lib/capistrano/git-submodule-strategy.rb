@@ -44,5 +44,9 @@ class Capistrano::Git
         context.execute("find #{release_path} -name '.git*' | xargs -I {} rm -rfv {}")
       end
     end
+
+    def fetch_revision
+      context.capture(:git, "rev-parse --short HEAD").strip
+    end
   end
 end
