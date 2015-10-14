@@ -40,7 +40,8 @@ class Capistrano::Git
     # and copy everything to the release path
     def release
       unless context.test(:test, '-e', release_path) && context.test("ls -A #{release_path} | read linevar")
-        context.execute("cp -r #{repo_path}/* #{release_path}/")
+        context.execute("rm -r #{release_path}/")
+        context.execute("cp -r #{repo_path} #{release_path}")
         context.execute("find #{release_path} -name '.git*' | xargs -I {} rm -rfv {}")
       end
     end
