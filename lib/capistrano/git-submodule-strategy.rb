@@ -24,7 +24,7 @@ class Capistrano::Git
     end
 
     def clone
-      git :clone, '--depth=1', '--recursive', '-b', fetch(:branch), repo_url, repo_path
+      git :clone, '--recursive', '-b', fetch(:branch), repo_url, repo_path
     end
 
     def update
